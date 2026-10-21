@@ -72,3 +72,37 @@ src/app/
   models.ts          — ApplicationModel + option lists
   field-errors.ts    — small reusable <app-field-errors> component
 ```
+
+## Claude Code project structure
+
+![Claude Code project structure](claude_setting.gif)
+
+This repo is also set up as a full Claude Code project — instructions, rules, commands, a skill,
+subagents, and a safety hook, so Claude Code (or any contributor using it) has the same context
+and guardrails every session. See `HOW_TO_RUN.txt` for how to invoke each piece.
+
+```
+.
+├── CLAUDE.md                     primary instructions, loaded every session
+├── CLAUDE.local.md               personal notes (gitignored)
+├── .mcp.json                     GitHub MCP server config (token via env var)
+└── .claude/
+    ├── settings.json             permissions allowlist/denylist + hook wiring
+    ├── settings.local.json       personal override (gitignored)
+    ├── rules/                    conventions auto-loaded by file path
+    │   ├── code-style.md         — Angular/TypeScript style (signals, OnPush, no ngClass/ngStyle…)
+    │   ├── testing.md            — Vitest conventions for this repo
+    │   └── api-conventions.md    — Signal Forms schema + component-input conventions
+    ├── commands/                 slash commands
+    │   ├── review.md             — /review: diff review against build, tests, and conventions
+    │   └── fix-issue.md          — /fix-issue <n>: fetch a GitHub issue, fix it, open a PR
+    ├── skills/
+    │   └── deploy/                — /deploy (or "deploy this"): build, push, and verify the
+    │       ├── SKILL.md             GitHub Pages deploy end-to-end
+    │       └── deploy-config.md   — repo/workflow/URL reference
+    ├── agents/                   subagents with isolated context
+    │   ├── code-reviewer.md      — read-only Angular/Signal Forms code review
+    │   └── security-auditor.md   — read-only secrets/CI/template-safety audit
+    └── hooks/
+        └── validate-bash.sh      — PreToolUse hook; blocks force-push, reset --hard, etc.
+```

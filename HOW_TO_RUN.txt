@@ -1,0 +1,66 @@
+HOW TO RUN THE CLAUDE CODE PROJECT STRUCTURE
+=============================================
+
+This file explains how to invoke each piece set up under .claude/, CLAUDE.md, and .mcp.json.
+
+CLAUDE.md / CLAUDE.local.md
+----------------------------
+Nothing to "run" — loaded automatically at the start of every session. CLAUDE.md is shared
+(committed); CLAUDE.local.md is personal (gitignored).
+
+.claude/rules/*.md
+-------------------
+Also automatic — not invoked manually. Each rule file's frontmatter `paths:` glob tells Claude
+Code when to pull it into context (e.g. code-style.md applies whenever *.ts/*.html files are
+involved).
+
+.claude/commands/*.md (slash commands)
+---------------------------------------
+Type the filename as a command in the chat:
+  /review
+  /fix-issue 42        (fix-issue takes the issue number as an argument)
+
+.claude/skills/deploy/ (skill)
+-------------------------------
+Two ways to trigger it:
+  1. Explicitly:  /deploy
+  2. Implicitly: just ask in plain language ("deploy this", "publish it", "push and deploy") —
+     Claude Code matches your request against the skill's description and loads it on its own.
+
+.claude/agents/*.md (subagents)
+----------------------------------
+Launched via the Agent tool, not typed directly by you. Ask for them by name or by task:
+  "use the code-reviewer agent on my latest changes"
+  "run a security audit before we deploy"
+Claude Code also launches code-reviewer proactively after implementing a feature/fix, since its
+description says to.
+
+.claude/hooks/validate-bash.sh
+--------------------------------
+Fully automatic — runs before every Bash tool call once wired into .claude/settings.json's
+PreToolUse hook. You never invoke it yourself; it silently allows safe commands and blocks
+anything matching its denylist (force-push, reset --hard, etc.).
+NOTE: this hook was added mid-session, so it needs one of the following before it's live:
+  - open /hooks once (reloads hook config), or
+  - restart Claude Code
+
+.claude/settings.json / settings.local.json
+----------------------------------------------
+Not invoked — read automatically at startup. settings.json (committed) holds the shared
+permission allowlist/denylist and the hook wiring; settings.local.json (gitignored) is for your
+own personal overrides on top of it.
+
+.mcp.json
+----------
+Not invoked directly either. Declares the "github" MCP server (uses $GITHUB_TOKEN from your
+environment, never a hardcoded token). Once Claude Code connects to it, its tools become
+available for you to ask Claude to use, the same way any other tool is used.
+
+QUICK REFERENCE
+-----------------
+/review                -> run the code review command
+/fix-issue <n>          -> fix a GitHub issue and open a PR
+/deploy                 -> run the deploy skill (or just ask to "deploy")
+"review with code-reviewer agent"     -> launches the code-reviewer subagent
+"run a security audit"                -> launches the security-auditor subagent
+(hooks, rules, CLAUDE.md, settings)   -> all automatic, nothing to type
