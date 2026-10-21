@@ -1,0 +1,265 @@
+<div class="page">
+  <header class="page-header">
+    <p class="eyebrow">Angular 22 · <code>&#64;angular/forms/signals</code></p>
+    <h1>Signal Forms Preview</h1>
+    <p class="subtitle">
+      A hands-on tour of Angular's experimental, signal-first forms API. Every validator, every
+      conditional field, and every bit of form state below is driven by
+      <code>form()</code>, a schema function, and nothing else — no <code>FormGroup</code>,
+      no <code>FormControl</code>, no module imports.
+    </p>
+  </header>
+
+  <div class="layout">
+    <form class="card form-card" [formRoot]="appForm">
+      <section class="field-group">
+        <h2>Basics</h2>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="firstName">First name</label>
+            <input id="firstName" type="text" [formField]="appForm.firstName" autocomplete="given-name" />
+            <app-field-errors
+              [errors]="appForm.firstName().errors()"
+              [touched]="appForm.firstName().touched()"
+            />
+          </div>
+
+          <div class="field">
+            <label for="lastName">Last name</label>
+            <input id="lastName" type="text" [formField]="appForm.lastName" autocomplete="family-name" />
+            <app-field-errors
+              [errors]="appForm.lastName().errors()"
+              [touched]="appForm.lastName().touched()"
+            />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" [formField]="appForm.email" autocomplete="email" />
+            <app-field-errors [errors]="appForm.email().errors()" [touched]="appForm.email().touched()" />
+          </div>
+
+          <div class="field field-narrow">
+            <label for="age">Age</label>
+            <input id="age" type="number" [formField]="appForm.age" />
+            <app-field-errors [errors]="appForm.age().errors()" [touched]="appForm.age().touched()" />
+          </div>
+        </div>
+      </section>
+
+      <section class="field-group">
+        <h2>Security</h2>
+        <p class="hint">Cross-field validation: <code>confirmPassword</code> reads its sibling's value via the field context.</p>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" [formField]="appForm.password" autocomplete="new-password" />
+            <app-field-errors
+              [errors]="appForm.password().errors()"
+              [touched]="appForm.password().touched()"
+            />
+          </div>
+
+          <div class="field">
+            <label for="confirmPassword">Confirm password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              [formField]="appForm.confirmPassword"
+              autocomplete="new-password"
+            />
+            <app-field-errors
+              [errors]="appForm.confirmPassword().errors()"
+              [touched]="appForm.confirmPassword().touched()"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="field-group">
+        <h2>Employment</h2>
+        <p class="hint">
+          "Company" is <code>hidden()</code> and conditionally <code>required()</code> based on
+          this selection; "Referral code" stays visible but is <code>disabled()</code> with a reason.
+        </p>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="employment">Employment status</label>
+            <select id="employment" [formField]="appForm.employment">
+              <option value="" disabled>Choose one…</option>
+              @for (option of employmentOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <app-field-errors
+              [errors]="appForm.employment().errors()"
+              [touched]="appForm.employment().touched()"
+            />
+          </div>
+
+          @if (!appForm.company().hidden()) {
+            <div class="field">
+              <label for="company">Company</label>
+              <input id="company" type="text" [formField]="appForm.company" />
+              <app-field-errors
+                [errors]="appForm.company().errors()"
+                [touched]="appForm.company().touched()"
+              />
+            </div>
+          }
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="referralSource">How did you hear about us?</label>
+            <select id="referralSource" [formField]="appForm.referralSource">
+              <option value="" disabled>Choose one…</option>
+              @for (option of referralOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <app-field-errors
+              [errors]="appForm.referralSource().errors()"
+              [touched]="appForm.referralSource().touched()"
+            />
+          </div>
+
+          <div class="field">
+            <label for="referralCode">Referral code</label>
+            <input id="referralCode" type="text" [formField]="appForm.referralCode" />
+            @if (appForm.referralCode().disabled()) {
+              <p class="hint hint-inline">
+                {{ appForm.referralCode().disabledReasons()[0]?.message }}
+              </p>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="field-group">
+        <h2>About you</h2>
+        <p class="hint">
+          <code>bio</code> is debounced by 400ms — the field's value signal (and its length-based
+          validators) only update after you pause typing.
+        </p>
+
+        <div class="field">
+          <label for="bio">Short bio <span class="muted">(optional, max 280 chars)</span></label>
+          <textarea id="bio" rows="3" [formField]="appForm.bio"></textarea>
+          <app-field-errors [errors]="appForm.bio().errors()" [touched]="appForm.bio().touched()" />
+          <p class="hint hint-inline">{{ appForm.bio().value().length }} / 280</p>
+        </div>
+
+        <div class="field">
+          <div class="skills-header">
+            <label>Skills</label>
+            <button type="button" class="btn btn-ghost" (click)="addSkill()">+ Add skill</button>
+          </div>
+          <app-field-errors [errors]="appForm.skills().errors()" [touched]="appForm.skills().touched()" />
+
+          @for (skill of appForm.skills; track $index) {
+            <div class="field-row skill-row">
+              <div class="field">
+                <input type="text" [formField]="skill" [placeholder]="'Skill #' + ($index + 1)" />
+                <app-field-errors [errors]="skill().errors()" [touched]="skill().touched()" />
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-danger"
+                [disabled]="appForm.skills().value().length <= 1"
+                (click)="removeSkill($index)"
+              >
+                Remove
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="field-group">
+        <label class="checkbox-row">
+          <input type="checkbox" id="acceptTerms" [formField]="appForm.acceptTerms" />
+          <span>I accept the terms and conditions</span>
+        </label>
+        <app-field-errors
+          [errors]="appForm.acceptTerms().errors()"
+          [touched]="appForm.acceptTerms().touched()"
+        />
+      </section>
+
+      @if (submitState() === 'success') {
+        <div class="banner banner-success">Application submitted — welcome aboard! 🎉</div>
+      }
+      @if (submitState() === 'error') {
+        <div class="banner banner-error">
+          Submission failed — check the errors above (try a different email than
+          <code>taken&#64;example.com</code>).
+        </div>
+      }
+
+      <div class="actions">
+        <button type="button" class="btn btn-ghost" (click)="resetForm()">Reset</button>
+        <button type="submit" class="btn btn-primary" [disabled]="appForm().submitting()">
+          {{ appForm().submitting() ? 'Submitting…' : 'Submit application' }}
+        </button>
+      </div>
+    </form>
+
+    <aside class="card state-card">
+      <h2>Live form state</h2>
+      <p class="hint">
+        Every value below comes straight off <code>appForm()</code>'s reactive <code>FieldState</code> —
+        this panel has no logic of its own.
+      </p>
+
+      <dl class="state-grid">
+        <dt>valid</dt>
+        <dd [class.pill-good]="appForm().valid()" [class.pill-bad]="!appForm().valid()">
+          {{ appForm().valid() }}
+        </dd>
+
+        <dt>invalid</dt>
+        <dd [class.pill-bad]="appForm().invalid()" [class.pill-good]="!appForm().invalid()">
+          {{ appForm().invalid() }}
+        </dd>
+
+        <dt>dirty</dt>
+        <dd>{{ appForm().dirty() }}</dd>
+
+        <dt>touched</dt>
+        <dd>{{ appForm().touched() }}</dd>
+
+        <dt>pending</dt>
+        <dd>{{ appForm().pending() }}</dd>
+
+        <dt>submitting</dt>
+        <dd>{{ appForm().submitting() }}</dd>
+      </dl>
+
+      @if (appForm().errorSummary().length > 0) {
+        <h3>Error summary ({{ appForm().errorSummary().length }})</h3>
+        <ul class="error-summary">
+          @for (error of appForm().errorSummary(); track $index) {
+            <li>
+              <strong>{{ error.fieldTree?.().name() || 'form' }}</strong
+              >: {{ error.message || error.kind }}
+            </li>
+          }
+        </ul>
+      }
+
+      <h3>Model value</h3>
+      <pre class="state-json">{{ model() | json }}</pre>
+    </aside>
+  </div>
+
+  <footer class="page-footer">
+    Built with Angular {{ '22' }} · zoneless change detection · Signal Forms is an experimental,
+    developer-preview API and its surface may still change before stabilizing.
+  </footer>
+</div>

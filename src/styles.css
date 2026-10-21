@@ -1,0 +1,71 @@
+/* Global styles */
+
+:root {
+  --color-bg: #f4f5fb;
+  --color-surface: #ffffff;
+  --color-border: #e1e3ef;
+  --color-text: #1b1d2a;
+  --color-text-muted: #6b6f85;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-success: #0f9d58;
+  --color-success-bg: #e8f7ee;
+  --color-danger: #d93025;
+  --color-danger-bg: #fdecea;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgba(79, 70, 229, 0.08);
+  color: var(--color-primary);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+/*
+ * Status classes applied automatically by `provideSignalFormsConfig()` to any element bound via
+ * `[formField]`. See app.config.ts for the predicates that drive these.
+ */
+input.sf-invalid,
+select.sf-invalid,
+textarea.sf-invalid {
+  border-color: var(--color-danger) !important;
+  background: var(--color-danger-bg);
+}
+
+input.sf-valid,
+select.sf-valid,
+textarea.sf-valid {
+  border-color: var(--color-success) !important;
+}
+
+input.sf-disabled,
+select.sf-disabled,
+textarea.sf-disabled {
+  background: #f0f0f4;
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
